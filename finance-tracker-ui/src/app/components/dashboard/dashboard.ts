@@ -7,6 +7,7 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { AuthService } from '../../services/auth.service';
 // Make sure this path matches exactly what the CLI generated
 import { DashboardService } from '../../services/dashboard'; 
+import { CurrencyService } from '../../services/currency';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,6 +19,7 @@ import { DashboardService } from '../../services/dashboard';
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private dashboardService = inject(DashboardService);
+  currency = inject(CurrencyService);
   
   username = signal<string | null>('');
 

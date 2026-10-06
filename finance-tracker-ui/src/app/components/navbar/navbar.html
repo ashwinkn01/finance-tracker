@@ -6,6 +6,15 @@
 
   <!-- The ng-container doesn't render in the DOM, it just holds our *ngIf logic -->
   <ng-container *ngIf="authService.loggedIn()">
+    <!-- Currency picker: changes how every amount in the app is displayed -->
+    <button mat-button [matMenuTriggerFor]="currencyMenu">
+      {{ currency.code() }} <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #currencyMenu="matMenu">
+      @for (c of currency.currencies; track c.code) {
+        <button mat-menu-item (click)="currency.set(c.code)">{{ c.code }} – {{ c.name }}</button>
+      }
+    </mat-menu>
     <button mat-button routerLink="/transactions">Transactions</button>
     <button mat-button routerLink="/dashboard">Dashboard</button>
     <button mat-flat-button color="accent" (click)="logout()">Logout</button>

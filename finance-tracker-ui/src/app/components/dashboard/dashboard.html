@@ -32,7 +32,7 @@
       </mat-card-header>
       <mat-card-content>
         <!-- The currency pipe automatically formats the number as $1,234.56 -->
-        <h2>{{ totalBalance() | currency }}</h2>
+        <h2>{{ totalBalance() | currency:currency.code() }}</h2>
       </mat-card-content>
     </mat-card>
 
@@ -42,7 +42,7 @@
         <mat-card-title>Monthly Expenses</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <h2>{{ monthlyExpenses() | currency }}</h2>
+        <h2>{{ monthlyExpenses() | currency:currency.code() }}</h2>
       </mat-card-content>
     </mat-card>
   </div>

@@ -9,3 +9,18 @@
 .full-width {
   grid-column: span 2; 
 }
+
+.category-add-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.category-add-field {
+  flex: 1;
+}
+
+.category-error {
+  color: var(--mat-sys-error);
+  font-size: 12px;
+}

@@ -26,6 +26,12 @@ public class TransactionController {
         return ResponseEntity.ok(created);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionResponseDto> updateTransaction(@PathVariable Long id,
+                                                                    @RequestBody TransactionDto transactionDto) {
+        return ResponseEntity.ok(transactionService.updateTransaction(id, transactionDto));
+    }
+
     @GetMapping
     public ResponseEntity<Page<TransactionResponseDto>> getTransactions(
             @RequestParam(defaultValue = "0") int page,

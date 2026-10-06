@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Add New Transaction</h2>
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Transaction' : 'Add New Transaction' }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="transactionForm" class="dialog-form">
@@ -15,7 +15,7 @@
     <!-- Amount Input -->
     <mat-form-field appearance="outline">
       <mat-label>Amount</mat-label>
-      <span matTextPrefix>$&nbsp;</span>
+      <span matTextPrefix>{{ currency.symbol() }}&nbsp;</span>
       <input matInput type="number" formControlName="amount" placeholder="0.00">
     </mat-form-field>
 
@@ -37,6 +37,25 @@
       </mat-select>
     </mat-form-field>
 
+    <!-- Inline "add category": creates it for the currently selected type -->
+    <div class="full-width category-add">
+      @if (!addingCategory()) {
+        <button mat-button type="button" (click)="addingCategory.set(true)">
+          <mat-icon>add</mat-icon> New {{ transactionForm.value.type === 'INCOME' ? 'income' : 'expense' }} category
+        </button>
+      } @else {
+        <div class="category-add-row">
+          <mat-form-field appearance="outline" class="category-add-field">
+            <mat-label>New category name</mat-label>
+            <input matInput [formControl]="newCategoryName" (keydown.enter)="$event.preventDefault(); saveNewCategory()">
+          </mat-form-field>
+          <button mat-flat-button type="button" [disabled]="newCategoryName.invalid" (click)="saveNewCategory()">Add</button>
+          <button mat-button type="button" (click)="cancelNewCategory()">Cancel</button>
+        </div>
+        @if (categoryError()) { <div class="category-error">{{ categoryError() }}</div> }
+      }
+    </div>
+
     <!-- Note (optional) -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Note (optional)</mat-label>
@@ -49,5 +68,5 @@
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
   <!-- Disables the save button until the form is entirely filled out -->
-  <button mat-flat-button color="primary" [disabled]="transactionForm.invalid" (click)="onSubmit()">Save</button>
+  <button mat-flat-button color="primary" [disabled]="transactionForm.invalid" (click)="onSubmit()">{{ isEdit ? 'Update' : 'Save' }}</button>
 </mat-dialog-actions>

@@ -56,6 +56,32 @@ public class TransactionService {
         return TransactionResponseDto.from(transactionRepository.save(transaction));
     }
 
+    // Update an existing Transaction (only the owner may do this)
+    public TransactionResponseDto updateTransaction(Long id, TransactionDto dto) {
+        User user = getAuthenticatedUser();
+
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        if (!transaction.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized to update this transaction");
+        }
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        if (!category.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: Category belongs to another user");
+        }
+
+        transaction.setAmount(dto.getAmount());
+        transaction.setType(dto.getType());
+        transaction.setTxnDate(dto.getTxnDate());
+        transaction.setTxnTime(dto.getTxnTime());
+        transaction.setNote(dto.getNote());
+        transaction.setCategory(category);
+
+        return TransactionResponseDto.from(transactionRepository.save(transaction));
+    }
+
     // 2. Get Paginated Transactions
     public Page<TransactionResponseDto> getUserTransactions(Pageable pageable) {
         return transactionRepository.findByUserId(getAuthenticatedUser().getId(), pageable)

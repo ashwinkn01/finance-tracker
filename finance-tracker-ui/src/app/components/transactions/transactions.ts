@@ -10,6 +10,7 @@ import { TransactionService } from '../../services/transaction';
 import { Transaction, TransactionRequest } from '../../models/transaction';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TransactionDialogComponent } from '../transaction-dialog/transaction-dialog';
+import { CurrencyService } from '../../services/currency';
 
 @Component({
   selector: 'app-transactions',
@@ -32,6 +33,7 @@ import { TransactionDialogComponent } from '../transaction-dialog/transaction-di
 export class TransactionsComponent implements OnInit {
   private transactionService = inject(TransactionService);
   private dialog = inject(MatDialog);
+  currency = inject(CurrencyService);
 
   // The Material Data Source holding our rows
   dataSource = new MatTableDataSource<Transaction>([]);
@@ -74,6 +76,20 @@ export class TransactionsComponent implements OnInit {
     this.transactionService.deleteTransaction(txn.id).subscribe({
       next: () => this.loadTransactions(),
       error: (err) => console.error('Failed to delete transaction', err)
+    });
+  }
+
+  openEditDialog(txn: Transaction): void {
+    // `data` is handed to the dialog, which switches into "edit mode" and pre-fills the form
+    const dialogRef = this.dialog.open(TransactionDialogComponent, { width: '500px', data: txn });
+
+    dialogRef.afterClosed().subscribe((result: TransactionRequest | undefined) => {
+      if (result) {
+        this.transactionService.updateTransaction(txn.id, result).subscribe({
+          next: () => this.loadTransactions(),
+          error: (err) => console.error('Failed to update transaction', err)
+        });
+      }
     });
   }
 

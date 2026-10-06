@@ -37,7 +37,7 @@
             <td mat-cell *matCellDef="let txn"> 
               <!-- Dynamically apply CSS classes based on IN vs OUT -->
               <span [ngClass]="txn.type === 'EXPENSE' ? 'text-expense' : 'text-income'">
-                {{ txn.type === 'EXPENSE' ? '-' : '+' }}{{ txn.amount | currency }} 
+                {{ txn.type === 'EXPENSE' ? '-' : '+' }}{{ txn.amount | currency:currency.code() }} 
               </span>
             </td>
           </ng-container>
@@ -52,7 +52,7 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let txn">
-              <button mat-icon-button color="primary">
+              <button mat-icon-button color="primary" (click)="openEditDialog(txn)">
                 <mat-icon>edit</mat-icon>
               </button>
               <button mat-icon-button color="warn" (click)="deleteTransaction(txn)">

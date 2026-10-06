@@ -23,7 +23,7 @@ import { TransactionDialogComponent } from '../transaction-dialog/transaction-di
 import { BudgetDialogComponent, BudgetDialogData } from '../budget-dialog/budget-dialog';
 
 // Slice colours: teal first, then distinct hues that stay readable on dark and light backgrounds
-const CHART_COLORS = ['#2dd4bf', '#38bdf8', '#a78bfa', '#fbbf24', '#fb7185', '#34d399', '#f97316', '#94a3b8'];
+const CHART_COLORS = ['#2dd4bf', '#38bdf8', '#a78bfa', '#fbbf24', '#fb7185', '#e879f9', '#f97316', '#94a3b8'];
 
 @Component({
   selector: 'app-dashboard',

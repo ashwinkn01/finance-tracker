@@ -2,6 +2,7 @@ package com.ashwin.financetracker.finance_tracker_api.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,6 +28,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // 0. Let Spring Security apply our CorsConfig (so preflight OPTIONS requests
+            //    are answered before the JWT check rejects them)
+            .cors(Customizer.withDefaults())
+
             // 1. Disable CSRF
             .csrf(AbstractHttpConfigurer::disable)
             

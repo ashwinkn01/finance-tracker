@@ -28,6 +28,7 @@
     <!-- routerLinkActive adds the "active" class to the link for the page you're on -->
     <a mat-button routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
     <a mat-button routerLink="/transactions" routerLinkActive="active">Transactions</a>
+    <a mat-button routerLink="/reports" routerLinkActive="active">Reports</a>
 
     <span class="user"><mat-icon>person</mat-icon> {{ authService.getCurrentUsername() }}</span>
     <button mat-stroked-button (click)="logout()">Logout</button>

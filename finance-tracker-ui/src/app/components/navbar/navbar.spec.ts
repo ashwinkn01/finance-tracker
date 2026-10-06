@@ -36,6 +36,7 @@ describe('NavbarComponent', () => {
     expect(text()).toContain('Transactions');
     expect(text()).toContain('Dashboard');
     expect(text()).toContain('Logout');
+    expect(text()).toContain('Reports');
   });
 
   it('shows the selected currency code', async () => {

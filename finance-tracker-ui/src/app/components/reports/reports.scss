@@ -1,0 +1,115 @@
+.reports-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 { margin: 0 0 8px 0; }
+  p { margin: 0; color: var(--mat-sys-on-surface-variant); }
+}
+
+.month-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .month-label {
+    min-width: 150px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+.download-card {
+  margin-bottom: 24px;
+}
+
+.download-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.download-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span { font-size: 13px; color: var(--mat-sys-on-surface-variant); }
+}
+
+.download-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat-card h2 {
+  font-size: 2rem;
+  margin: 16px 0 0 0;
+  color: var(--mat-sys-primary);
+
+  &.positive { color: var(--ft-income); }
+  &.negative { color: var(--ft-expense); }
+}
+
+.category-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+
+  th, td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  th { color: var(--mat-sys-on-surface-variant); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; opacity: 0.7; }
+  p { margin: 0; }
+}
+
+.error-text {
+  color: var(--ft-expense);
+  margin: 12px 0 0;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}

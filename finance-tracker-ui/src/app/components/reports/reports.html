@@ -1,0 +1,106 @@
+<div class="reports-container">
+  <header class="reports-header">
+    <div>
+      <h1>Reports</h1>
+      <p>Preview a month and download it as CSV or PDF.</p>
+    </div>
+
+    <!-- Month stepper: ‹ October 2026 › -->
+    <div class="month-picker">
+      <button mat-icon-button (click)="previousMonth()" aria-label="Previous month">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="month-label">{{ monthLabel() }}</span>
+      <button mat-icon-button (click)="nextMonth()" [disabled]="isCurrentMonth()" aria-label="Next month">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      @if (!isCurrentMonth()) {
+        <button mat-stroked-button (click)="goToThisMonth()">This month</button>
+      }
+    </div>
+  </header>
+
+  <!-- Download actions -->
+  <mat-card class="download-card">
+    <mat-card-content>
+      <div class="download-row">
+        <div class="download-text">
+          <strong>Download {{ monthLabel() }}</strong>
+          <span>Amounts are labelled in {{ currency.code() }} (no conversion is applied).</span>
+        </div>
+        <div class="download-buttons">
+          <button mat-stroked-button (click)="download('csv')" [disabled]="loading() || isEmpty() || !!downloading()">
+            @if (downloading() === 'csv') { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>table_view</mat-icon> }
+            CSV
+          </button>
+          <button mat-flat-button (click)="download('pdf')" [disabled]="loading() || isEmpty() || !!downloading()">
+            @if (downloading() === 'pdf') { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>picture_as_pdf</mat-icon> }
+            PDF
+          </button>
+        </div>
+      </div>
+      @if (downloadError()) {
+        <p class="error-text" role="alert">{{ downloadError() }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (loading()) {
+    <div class="center"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else if (loadError()) {
+    <p class="error-text" role="alert">{{ loadError() }}</p>
+  } @else if (isEmpty()) {
+    <mat-card>
+      <mat-card-content>
+        <div class="empty-state">
+          <mat-icon>description</mat-icon>
+          <p>No transactions in {{ monthLabel() }}, so there is nothing to report.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else if (summary(); as s) {
+    <!-- Summary preview (the same totals that appear at the top of the PDF) -->
+    <div class="summary-grid">
+      <mat-card class="stat-card">
+        <mat-card-header><mat-card-title>Income</mat-card-title></mat-card-header>
+        <mat-card-content><h2 class="positive">{{ s.totalIncome | currency:currency.code() }}</h2></mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-header><mat-card-title>Expenses</mat-card-title></mat-card-header>
+        <mat-card-content><h2 class="negative">{{ s.totalExpenses | currency:currency.code() }}</h2></mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-header><mat-card-title>Net Balance</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <h2 [class.positive]="s.netBalance > 0" [class.negative]="s.netBalance < 0">
+            {{ s.netBalance | currency:currency.code() }}
+          </h2>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card>
+      <mat-card-header><mat-card-title>Spending by category</mat-card-title></mat-card-header>
+      <mat-card-content>
+        @if (categories().length) {
+          <table class="category-table">
+            <thead>
+              <tr><th>Category</th><th class="num">Amount</th><th class="num">Share</th></tr>
+            </thead>
+            <tbody>
+              @for (c of categories(); track c.name) {
+                <tr>
+                  <td>{{ c.name }}</td>
+                  <td class="num">{{ c.amount | currency:currency.code() }}</td>
+                  <td class="num">{{ c.share | number:'1.0-1' }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="muted">No expenses recorded in {{ monthLabel() }}.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

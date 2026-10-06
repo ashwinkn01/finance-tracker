@@ -4,6 +4,7 @@ import { DashboardComponent } from './components/dashboard/dashboard';
 import { authGuard } from './guards/auth-guard'; 
 import { TransactionsComponent } from './components/transactions/transactions';
 import { RegisterComponent } from './components/register/register';
+import { ReportsComponent } from './components/reports/reports';
 
 export const routes: Routes = [
   { 
@@ -21,6 +22,11 @@ export const routes: Routes = [
   component: TransactionsComponent,
   canActivate: [authGuard] 
     },
+  {
+    path: 'reports',
+    component: ReportsComponent,
+    canActivate: [authGuard]
+  },
   { 
     path: '', 
     redirectTo: '/login', 

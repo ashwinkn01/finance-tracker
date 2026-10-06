@@ -1,48 +1,102 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
-    <h1>Welcome back, {{ username() }}!</h1>
-    <p>Here is your financial overview.</p>
+    <div>
+      <h1>Welcome back, {{ username() }}!</h1>
+      <p>Here is your financial overview.</p>
+    </div>
+
+    <!-- Month stepper: ‹ October 2026 › -->
+    <div class="month-picker">
+      <button mat-icon-button (click)="previousMonth()" aria-label="Previous month">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="month-label">{{ monthLabel() }}</span>
+      <button mat-icon-button (click)="nextMonth()" [disabled]="isCurrentMonth()" aria-label="Next month">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      @if (!isCurrentMonth()) {
+        <button mat-stroked-button (click)="goToThisMonth()">This month</button>
+      }
+    </div>
   </header>
 
-  <div class="dashboard-grid">
-    <!-- Updated Stat Card 1: Expense Breakdown Chart -->
+  <!-- Summary cards -->
+  <div class="summary-grid">
     <mat-card class="stat-card">
-      <mat-card-header>
-        <mat-card-title>Expense Breakdown</mat-card-title>
-      </mat-card-header>
+      <mat-card-header><mat-card-title>Income</mat-card-title></mat-card-header>
       <mat-card-content>
-        <!-- The chart container gives the canvas a boundary to fill -->
-        <div class="chart-container">
-          <!-- We read the signals using () and bind them to the canvas -->
-          <canvas baseChart
-            [data]="pieChartData()"
-            [options]="pieChartOptions()"
-            [type]="pieChartType()">
-          </canvas>
-        </div>
+        <h2 class="positive">{{ totalIncome() | currency:currency.code() }}</h2>
       </mat-card-content>
     </mat-card>
 
-    <!-- Inside your dashboard-grid ... -->
-
-    <!-- Stat Card 2 -->
     <mat-card class="stat-card">
-      <mat-card-header>
-        <mat-card-title>Total Balance</mat-card-title>
-      </mat-card-header>
+      <mat-card-header><mat-card-title>Expenses</mat-card-title></mat-card-header>
       <mat-card-content>
-        <!-- The currency pipe automatically formats the number as $1,234.56 -->
-        <h2 [class.positive]="totalBalance() > 0" [class.negative]="totalBalance() < 0">{{ totalBalance() | currency:currency.code() }}</h2>
+        <h2 class="negative">{{ totalExpenses() | currency:currency.code() }}</h2>
       </mat-card-content>
     </mat-card>
 
-    
     <mat-card class="stat-card">
-      <mat-card-header>
-        <mat-card-title>Monthly Expenses</mat-card-title>
+      <mat-card-header><mat-card-title>Net Balance</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <h2 [class.positive]="netBalance() > 0" [class.negative]="netBalance() < 0">
+          {{ netBalance() | currency:currency.code() }}
+        </h2>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="detail-grid">
+    <!-- Expense breakdown, or the empty state for a month with no data -->
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>Expense Breakdown</mat-card-title></mat-card-header>
+      <mat-card-content>
+        @if (isEmpty()) {
+          <div class="empty-state">
+            <mat-icon>insights</mat-icon>
+            <p>No transactions in {{ monthLabel() }} yet.</p>
+            <button mat-flat-button (click)="openAddDialog()">
+              <mat-icon>add</mat-icon> Add Transaction
+            </button>
+          </div>
+        } @else if (pieChartData().labels?.length) {
+          <div class="chart-container">
+            <canvas baseChart
+              [data]="pieChartData()"
+              [options]="pieChartOptions()"
+              [type]="pieChartType()">
+            </canvas>
+          </div>
+        } @else {
+          <div class="empty-state"><p>No expenses recorded in {{ monthLabel() }}.</p></div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Most recent transactions (any month) -->
+    <mat-card class="stat-card">
+      <mat-card-header class="recent-header">
+        <mat-card-title>Recent Transactions</mat-card-title>
+        <a mat-button routerLink="/transactions">View all</a>
       </mat-card-header>
       <mat-card-content>
-        <h2 class="negative">{{ monthlyExpenses() | currency:currency.code() }}</h2>
+        @if (recent().length) {
+          <ul class="recent-list">
+            @for (t of recent(); track t.id) {
+              <li>
+                <div class="recent-main">
+                  <span class="recent-title">{{ t.note || t.categoryName }}</span>
+                  <span class="recent-sub">{{ t.categoryName }} · {{ t.txnDate | date:'mediumDate' }}</span>
+                </div>
+                <span [ngClass]="t.type === 'EXPENSE' ? 'text-expense' : 'text-income'" class="recent-amount">
+                  {{ t.type === 'EXPENSE' ? '-' : '+' }}{{ t.amount | currency:currency.code() }}
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="empty-state"><p>No transactions yet.</p></div>
+        }
       </mat-card-content>
     </mat-card>
   </div>

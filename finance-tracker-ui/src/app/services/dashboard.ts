@@ -28,8 +28,9 @@ export class DashboardService {
     return this.http.get<DashboardSummaryResponse>(`${this.apiUrl}/summary`, { params }).pipe(
       // map() reshapes the backend DTO into the model the UI uses
       map(res => ({
-        totalBalance: res.netBalance,
-        monthlyExpenses: res.totalExpenses,
+        totalIncome: res.totalIncome,
+        totalExpenses: res.totalExpenses,
+        netBalance: res.netBalance,
         expenseBreakdown: res.categoryBreakdown.map(c => ({
           category: c.categoryName,
           amount: c.totalSpent
@@ -38,7 +39,7 @@ export class DashboardService {
     );
   }
 
-  private currentMonth(): string {
+  currentMonth(): string {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }

@@ -4,9 +4,10 @@ export interface CategoryExpense {
   amount: number;
 }
 
-// Maps to the Java DTO representing the entire dashboard payload
+// The dashboard payload for ONE month (mapped from the backend's DashboardSummaryDto)
 export interface DashboardSummary {
-  totalBalance: number;
-  monthlyExpenses: number;
+  totalIncome: number;
+  totalExpenses: number;
+  netBalance: number;
   expenseBreakdown: CategoryExpense[];
 }

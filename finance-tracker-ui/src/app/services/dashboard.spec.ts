@@ -27,8 +27,9 @@ describe('DashboardService', () => {
     });
 
     expect(result).toEqual({
-      totalBalance: 87.5,
-      monthlyExpenses: 12.5,
+      totalIncome: 100,
+      totalExpenses: 12.5,
+      netBalance: 87.5,
       expenseBreakdown: [{ category: 'Food', amount: 12.5 }]
     });
   });

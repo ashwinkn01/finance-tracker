@@ -133,3 +133,67 @@
   font-weight: 500;
   white-space: nowrap;
 }
+
+
+.budget-card {
+  margin-top: 24px;
+}
+
+.budget-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.budget-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+
+  li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    &:last-child { border-bottom: none; }
+  }
+}
+
+.budget-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.budget-name {
+  font-weight: 500;
+  flex: 1;
+}
+
+.budget-numbers {
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.budget-buttons {
+  display: inline-flex;
+}
+
+.budget-overage {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ft-expense);
+}
+
+// Progress bar colour follows the state class on the <li>
+.budget-ok   { --mat-progress-bar-active-indicator-color: var(--ft-income); }
+.budget-warn { --mat-progress-bar-active-indicator-color: #e0a100; }
+.budget-over { --mat-progress-bar-active-indicator-color: var(--ft-expense); }
+
+mat-progress-bar {
+  --mat-progress-bar-track-color: var(--mat-sys-surface-container-highest);
+  --mat-progress-bar-track-height: 8px;
+  --mat-progress-bar-active-indicator-height: 8px;
+  --mat-progress-bar-track-shape: 4px;
+}

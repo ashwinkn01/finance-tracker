@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -13,10 +14,13 @@ import { AuthService } from '../../services/auth.service';
 // Make sure this path matches exactly what the CLI generated
 import { DashboardService } from '../../services/dashboard';
 import { TransactionService } from '../../services/transaction';
+import { BudgetService } from '../../services/budget';
 import { CurrencyService } from '../../services/currency';
 import { ThemeService } from '../../services/theme';
 import { Transaction, TransactionRequest } from '../../models/transaction';
+import { Budget, BudgetRequest } from '../../models/budget';
 import { TransactionDialogComponent } from '../transaction-dialog/transaction-dialog';
+import { BudgetDialogComponent, BudgetDialogData } from '../budget-dialog/budget-dialog';
 
 // Slice colours: teal first, then distinct hues that stay readable on dark and light backgrounds
 const CHART_COLORS = ['#2dd4bf', '#38bdf8', '#a78bfa', '#fbbf24', '#fb7185', '#34d399', '#f97316', '#94a3b8'];
@@ -26,7 +30,7 @@ const CHART_COLORS = ['#2dd4bf', '#38bdf8', '#a78bfa', '#fbbf24', '#fb7185', '#3
   standalone: true,
   imports: [
     CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatDialogModule,
-    BaseChartDirective
+    MatProgressBarModule, BaseChartDirective
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
@@ -35,6 +39,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private dashboardService = inject(DashboardService);
   private transactionService = inject(TransactionService);
+  private budgetService = inject(BudgetService);
   private dialog = inject(MatDialog);
   currency = inject(CurrencyService);
   private theme = inject(ThemeService);
@@ -56,6 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   netBalance = signal<number>(0);
   loaded = signal<boolean>(false);
   recent = signal<Transaction[]>([]);
+  budgets = signal<Budget[]>([]);
   // Nothing to show for this month -> friendly empty state instead of zeros
   isEmpty = computed(() => this.loaded() && this.totalIncome() === 0 && this.totalExpenses() === 0);
 
@@ -82,16 +88,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   });
 
+  // "September 2026" - the month before the one being viewed (for the copy button)
+  previousMonthLabel = computed(() => {
+    const [y, m] = this.month().split('-').map(Number);
+    return new Date(y, m - 2, 1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+  });
+
   private summarySub?: Subscription;
+  private budgetSub?: Subscription;
 
   ngOnInit(): void {
     this.username.set(this.authService.getCurrentUsername());
     this.loadDashboardData();
+    this.loadBudgets();
     this.loadRecent();
   }
 
   ngOnDestroy(): void {
     this.summarySub?.unsubscribe();
+    this.budgetSub?.unsubscribe();
   }
 
   // --- Month navigation ---
@@ -104,6 +119,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   goToThisMonth(): void {
     this.month.set(this.dashboardService.currentMonth());
     this.loadDashboardData();
+    this.loadBudgets();
   }
 
   private shiftMonth(delta: number): void {
@@ -111,6 +127,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const d = new Date(y, m - 1 + delta, 1);
     this.month.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
     this.loadDashboardData();
+    this.loadBudgets();
   }
 
   // --- Data loading ---
@@ -138,6 +155,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadBudgets(): void {
+    this.budgetSub?.unsubscribe();
+    this.budgetSub = this.budgetService.getBudgets(this.month()).subscribe({
+      next: (budgets) => this.budgets.set(budgets),
+      error: (err) => console.error('Failed to load budgets', err)
+    });
+  }
+
   private loadRecent(): void {
     // The backend returns newest first, so page 0 with 5 rows is "recent"
     this.transactionService.getTransactions(0, 5).subscribe({
@@ -156,10 +181,53 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // Jump to the month of the new transaction so the user sees it
             this.month.set(result.txnDate.slice(0, 7));
             this.loadDashboardData();
+            this.loadBudgets();
             this.loadRecent();
           },
           error: (err) => console.error('Failed to save transaction', err)
         });
       });
+  }
+
+  // --- Budgets ---
+  // Colour band for a progress bar: green under 80%, amber up to the limit, red once over it
+  budgetState(b: Budget): 'ok' | 'warn' | 'over' {
+    if (b.overBudget) return 'over';
+    return b.percentUsed >= 80 ? 'warn' : 'ok';
+  }
+
+  openBudgetDialog(existing?: Budget): void {
+    const data: BudgetDialogData = {
+      month: this.month(),
+      monthLabel: this.monthLabel(),
+      existing,
+      takenCategoryIds: this.budgets().map(b => b.categoryId)
+    };
+    this.dialog.open(BudgetDialogComponent, { width: '420px', data })
+      .afterClosed().subscribe((request: BudgetRequest | undefined) => {
+        if (!request) return;
+        this.budgetService.saveBudget(request).subscribe({
+          next: () => this.loadBudgets(),
+          error: (err) => console.error('Failed to save budget', err)
+        });
+      });
+  }
+
+  deleteBudget(b: Budget): void {
+    if (!confirm(`Remove the ${b.categoryName} budget for ${this.monthLabel()}?`)) return;
+    this.budgetService.deleteBudget(b.id).subscribe({
+      next: () => this.loadBudgets(),
+      error: (err) => console.error('Failed to delete budget', err)
+    });
+  }
+
+  copyFromPreviousMonth(): void {
+    const [y, m] = this.month().split('-').map(Number);
+    const prev = new Date(y, m - 2, 1);
+    const from = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+    this.budgetService.copyBudgets(from, this.month()).subscribe({
+      next: (budgets) => this.budgets.set(budgets),
+      error: (err) => console.error('Failed to copy budgets', err)
+    });
   }
 }

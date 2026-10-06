@@ -8,10 +8,12 @@ import { of, throwError } from 'rxjs';
 import { DashboardComponent } from './dashboard';
 import { DashboardService } from '../../services/dashboard';
 import { TransactionService } from '../../services/transaction';
+import { BudgetService } from '../../services/budget';
 import { AuthService } from '../../services/auth.service';
 import { CurrencyService } from '../../services/currency';
 import { DashboardSummary } from '../../models/dashboard';
 import { Transaction } from '../../models/transaction';
+import { Budget } from '../../models/budget';
 import { fakeJwt } from '../../testing/fake-jwt';
 
 const summary = (over: Partial<DashboardSummary> = {}): DashboardSummary => ({
@@ -23,11 +25,17 @@ const txn: Transaction = {
   note: 'Lunch', categoryId: 2, categoryName: 'Food'
 };
 
+const budget = (over: Partial<Budget> = {}): Budget => ({
+  id: 1, categoryId: 2, categoryName: 'Food', monthYear: '2026-10',
+  limitAmount: 100, spent: 50, percentUsed: 50, overBudget: false, ...over
+});
+
 describe('DashboardComponent', () => {
   let fixture: ComponentFixture<DashboardComponent>;
   let component: DashboardComponent;
   let dashboard: DashboardService;
   let transactions: TransactionService;
+  let budgets: BudgetService;
   let getSummary: ReturnType<typeof vi.spyOn>;
   // The component imports MatDialogModule, so its MatDialog must be faked at component level
   const dialog = { open: vi.fn() };
@@ -50,6 +58,8 @@ describe('DashboardComponent', () => {
     TestBed.inject(AuthService).setToken(fakeJwt(3600, 'alice'));
     dashboard = TestBed.inject(DashboardService);
     transactions = TestBed.inject(TransactionService);
+    budgets = TestBed.inject(BudgetService);
+    vi.spyOn(budgets, 'getBudgets').mockReturnValue(of([budget()]));
     getSummary = vi.spyOn(dashboard, 'getSummary').mockReturnValue(of(summary()));
     vi.spyOn(transactions, 'getTransactions')
       .mockReturnValue(of({ content: [txn], totalElements: 1, number: 0, size: 5 }));
@@ -138,5 +148,89 @@ describe('DashboardComponent', () => {
     getSummary.mockReturnValue(throwError(() => new Error('boom')));
     await create();
     expect(component.totalExpenses()).toBe(0);
+  });
+
+  describe('budgets', () => {
+    it('loads the budgets of the viewed month and reloads when the month changes', async () => {
+      await create();
+      expect(budgets.getBudgets).toHaveBeenCalledWith(dashboard.currentMonth());
+      expect(component.budgets()).toHaveLength(1);
+      expect(text()).toContain('Food');
+      expect(text()).toContain('$50.00 of $100.00');
+
+      component.previousMonth();
+      expect(budgets.getBudgets).toHaveBeenLastCalledWith(component.month());
+    });
+
+    it('colours bars green under 80%, amber from 80% to the limit, red when over', async () => {
+      await create();
+      expect(component.budgetState(budget({ percentUsed: 79.9 }))).toBe('ok');
+      expect(component.budgetState(budget({ percentUsed: 80 }))).toBe('warn');
+      expect(component.budgetState(budget({ percentUsed: 100 }))).toBe('warn');
+      expect(component.budgetState(budget({ percentUsed: 120, overBudget: true }))).toBe('over');
+    });
+
+    it('says how much a budget is exceeded by', async () => {
+      vi.mocked(budgets.getBudgets).mockReturnValue(
+        of([budget({ spent: 125.5, percentUsed: 125.5, overBudget: true })]));
+      await create();
+      expect(text()).toContain('Over budget by $25.50');
+    });
+
+    it('offers to copy last month only when there are no budgets yet', async () => {
+      vi.mocked(budgets.getBudgets).mockReturnValue(of([]));
+      await create();
+      expect(text()).toContain('No budgets set for');
+      expect(text()).toContain('Copy from');
+
+      vi.mocked(budgets.getBudgets).mockReturnValue(of([budget()]));
+      component.goToThisMonth();
+      await fixture.whenStable();
+      expect(text()).not.toContain('Copy from');
+    });
+
+    it('copies from the previous month into the viewed month', async () => {
+      vi.mocked(budgets.getBudgets).mockReturnValue(of([]));
+      const copy = vi.spyOn(budgets, 'copyBudgets').mockReturnValue(of([budget()]));
+      await create();
+      component.month.set('2026-01');
+
+      component.copyFromPreviousMonth();
+      expect(copy).toHaveBeenCalledWith('2025-12', '2026-01');
+      expect(component.budgets()).toHaveLength(1);
+    });
+
+    it('saves a budget returned by the dialog, passing the month and taken categories', async () => {
+      const request = { categoryId: 2, limitAmount: 80, monthYear: '2026-10' };
+      dialog.open.mockReturnValue({ afterClosed: () => of(request) });
+      const save = vi.spyOn(budgets, 'saveBudget').mockReturnValue(of(budget()));
+      await create();
+
+      component.openBudgetDialog();
+      const config = dialog.open.mock.calls[0][1];
+      expect(config.data).toMatchObject({ month: dashboard.currentMonth(), takenCategoryIds: [2] });
+      expect(save).toHaveBeenCalledWith(request);
+    });
+
+    it('does not save when the dialog is cancelled', async () => {
+      dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+      const save = vi.spyOn(budgets, 'saveBudget');
+      await create();
+      component.openBudgetDialog();
+      expect(save).not.toHaveBeenCalled();
+    });
+
+    it('removes a budget after confirmation, and not when cancelled', async () => {
+      const del = vi.spyOn(budgets, 'deleteBudget').mockReturnValue(of({ message: 'ok' }));
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      await create();
+
+      component.deleteBudget(budget());
+      expect(del).not.toHaveBeenCalled();
+
+      confirm.mockReturnValue(true);
+      component.deleteBudget(budget());
+      expect(del).toHaveBeenCalledWith(1);
+    });
   });
 });

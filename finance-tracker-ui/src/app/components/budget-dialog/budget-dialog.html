@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit budget' : 'Set a budget' }} · {{ data.monthLabel }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="budget-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="categoryId">
+        @for (c of categories(); track c.id) {
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+        }
+      </mat-select>
+      @if (!isEdit && categories().length === 0) {
+        <mat-hint>Every expense category already has a budget this month.</mat-hint>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Monthly limit</mat-label>
+      <span matTextPrefix>{{ currency.symbol() }}&nbsp;</span>
+      <input matInput type="number" formControlName="limitAmount" placeholder="0.00">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button [disabled]="form.invalid" (click)="onSubmit()">{{ isEdit ? 'Update' : 'Save' }}</button>
+</mat-dialog-actions>

@@ -100,4 +100,54 @@
       </mat-card-content>
     </mat-card>
   </div>
+
+  <!-- Budgets for the chosen month -->
+  <mat-card class="stat-card budget-card">
+    <mat-card-header class="recent-header">
+      <mat-card-title>Budgets · {{ monthLabel() }}</mat-card-title>
+      <div class="budget-actions">
+        @if (budgets().length === 0) {
+          <button mat-stroked-button (click)="copyFromPreviousMonth()">
+            <mat-icon>content_copy</mat-icon> Copy from {{ previousMonthLabel() }}
+          </button>
+        }
+        <button mat-flat-button (click)="openBudgetDialog()">
+          <mat-icon>add</mat-icon> Set budget
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      @if (budgets().length) {
+        <ul class="budget-list">
+          @for (b of budgets(); track b.id) {
+            <li [class]="'budget-' + budgetState(b)">
+              <div class="budget-top">
+                <span class="budget-name">{{ b.categoryName }}</span>
+                <span class="budget-numbers">
+                  {{ b.spent | currency:currency.code() }} of {{ b.limitAmount | currency:currency.code() }}
+                  · <strong>{{ b.percentUsed | number:'1.0-0' }}%</strong>
+                </span>
+                <span class="budget-buttons">
+                  <button mat-icon-button (click)="openBudgetDialog(b)" aria-label="Edit budget">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteBudget(b)" aria-label="Remove budget">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="b.percentUsed > 100 ? 100 : b.percentUsed"></mat-progress-bar>
+              @if (b.overBudget) {
+                <span class="budget-overage">Over budget by {{ b.spent - b.limitAmount | currency:currency.code() }}</span>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="empty-state">
+          <p>No budgets set for {{ monthLabel() }}.</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
 </div>

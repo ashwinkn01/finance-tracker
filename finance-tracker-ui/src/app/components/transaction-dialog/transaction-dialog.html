@@ -22,21 +22,25 @@
     <!-- Date Picker -->
     <mat-form-field appearance="outline">
       <mat-label>Date</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="date">
+      <input matInput [matDatepicker]="picker" formControlName="txnDate">
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
-    <!-- Category Input -->
+    <!-- Category: only shows categories matching the chosen type -->
     <mat-form-field appearance="outline">
-      <mat-label>Category (e.g., Food, Rent, Salary)</mat-label>
-      <input matInput formControlName="category">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="categoryId">
+        @for (c of categories(); track c.id) {
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+        }
+      </mat-select>
     </mat-form-field>
 
-    <!-- Description Input -->
+    <!-- Note (optional) -->
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Description</mat-label>
-      <input matInput formControlName="description">
+      <mat-label>Note (optional)</mat-label>
+      <input matInput formControlName="note">
     </mat-form-field>
 
   </form>

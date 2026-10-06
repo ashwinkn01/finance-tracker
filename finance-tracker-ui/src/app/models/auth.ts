@@ -13,6 +13,5 @@ export interface RegisterRequest {
 
 // Maps to the JSON response your backend sends upon successful login
 export interface AuthResponse {
-  accessToken: string;
-  tokenType: string;
+  token: string;
 }

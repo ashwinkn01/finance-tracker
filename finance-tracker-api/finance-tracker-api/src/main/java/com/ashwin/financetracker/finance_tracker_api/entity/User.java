@@ -19,6 +19,6 @@ public class User {
     private Long id;
     @Column(unique = true, nullable = false) private String username;
     @Column(unique = true, nullable = false) private String email;
-    @Column(nullable = false) private String password;
+    @Column(nullable = false, length = 255) private String password;
     private LocalDateTime createdAt = LocalDateTime.now();
 }

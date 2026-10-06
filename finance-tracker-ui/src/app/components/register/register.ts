@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [
     CommonModule,
@@ -18,37 +18,34 @@ import { AuthService } from '../../services/auth.service';
     MatInputModule,
     MatButtonModule
   ],
-  templateUrl: './login.html',
-  styleUrl: './login.scss' // Note: Angular 17+ uses styleUrl (singular)
+  templateUrl: './register.html',
+  styleUrl: './register.scss'
 })
-export class LoginComponent {
-  loginForm: FormGroup;
+export class RegisterComponent {
+  registerForm: FormGroup;
   errorMessage = '';
 
-  // inject() is the modern Angular way to bring in services
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   constructor() {
-    // This creates our form and enforces that both fields are mandatory
-    this.loginForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required]
+    this.registerForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(4)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      // Remember that Observable? This .subscribe() is what actually fires the HTTP request
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          this.authService.setToken(response.token);
-          // Once successful, send them to the dashboard
-          this.router.navigate(['/dashboard']); 
+    if (this.registerForm.valid) {
+      this.authService.register(this.registerForm.value).subscribe({
+        next: () => {
+          // Send them to login after successful registration
+          this.router.navigate(['/login']); 
         },
         error: (err) => {
-          this.errorMessage = 'Invalid username or password. Please try again.';
+          this.errorMessage = err.error?.message ?? 'Registration failed. Please try again.';
         }
       });
     }

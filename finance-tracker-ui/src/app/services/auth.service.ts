@@ -21,7 +21,7 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, data);
+    return this.http.post(`${this.apiUrl}/signup`, data);
   }
 
   // --- TOKEN MANAGEMENT ---

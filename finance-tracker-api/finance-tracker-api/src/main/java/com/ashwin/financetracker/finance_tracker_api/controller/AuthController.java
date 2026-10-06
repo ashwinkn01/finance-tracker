@@ -6,6 +6,8 @@ import com.ashwin.financetracker.finance_tracker_api.dto.SignupRequest;
 import com.ashwin.financetracker.finance_tracker_api.entity.User;
 import com.ashwin.financetracker.finance_tracker_api.repository.UserRepository;
 import com.ashwin.financetracker.finance_tracker_api.security.JwtUtil;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,10 +38,10 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
         // 1. Check if username or email already exists
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Username is already taken!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Username is already taken!"));
         }
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Email is already in use!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Email is already in use!"));
         }
 
         // 2. Create a new User entity
@@ -53,7 +55,7 @@ public class AuthController {
         // 4. Save to the database
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(Map.of("message", "User registered successfully!"));
     }
 
     @PostMapping("/login")
@@ -72,7 +74,7 @@ public class AuthController {
 
         } catch (AuthenticationException e) {
             // If the password was wrong, Spring Security throws an exception
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid username or password"));
         }
     }
 }

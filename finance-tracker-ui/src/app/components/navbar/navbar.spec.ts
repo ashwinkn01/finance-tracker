@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { NavbarComponent } from './navbar';
 import { AuthService } from '../../services/auth.service';
 import { CurrencyService } from '../../services/currency';
+import { ThemeService } from '../../services/theme';
 import { fakeJwt } from '../../testing/fake-jwt';
 
 describe('NavbarComponent', () => {
@@ -55,5 +56,20 @@ describe('NavbarComponent', () => {
     expect(auth.getToken()).toBeNull();
     expect(navigate).toHaveBeenCalledWith(['/login']);
     expect(text()).not.toContain('Logout');
+  });
+
+  it('has a theme toggle that works even when logged out', async () => {
+    const theme = TestBed.inject(ThemeService);
+    expect(theme.isDark()).toBe(true);
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button[mat-icon-button]') as HTMLButtonElement;
+    button.click();
+    await fixture.whenStable();
+    expect(theme.isDark()).toBe(false);
+  });
+
+  it('shows the logged-in username', async () => {
+    auth.setToken(fakeJwt(3600, 'alice'));
+    await fixture.whenStable();
+    expect(text()).toContain('alice');
   });
 });

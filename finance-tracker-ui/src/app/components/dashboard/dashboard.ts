@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { BaseChartDirective } from 'ng2-charts';
@@ -8,6 +8,10 @@ import { AuthService } from '../../services/auth.service';
 // Make sure this path matches exactly what the CLI generated
 import { DashboardService } from '../../services/dashboard'; 
 import { CurrencyService } from '../../services/currency';
+import { ThemeService } from '../../services/theme';
+
+// Slice colours: teal first, then distinct hues that stay readable on dark and light backgrounds
+const CHART_COLORS = ['#2dd4bf', '#38bdf8', '#a78bfa', '#fbbf24', '#fb7185', '#34d399', '#f97316', '#94a3b8'];
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +24,7 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private dashboardService = inject(DashboardService);
   currency = inject(CurrencyService);
+  private theme = inject(ThemeService);
   
   username = signal<string | null>('');
 
@@ -35,16 +40,21 @@ export class DashboardComponent implements OnInit {
     labels: [],
     datasets: [{ 
       data: [], 
-      backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ffc107', '#9c27b0'] 
+      backgroundColor: CHART_COLORS
     }]
   });
 
-  pieChartOptions = signal<ChartConfiguration['options']>({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { 
-      legend: { position: 'right' } 
-    }
+  // computed(): rebuilt whenever the theme flips, so legend text stays readable
+  pieChartOptions = computed<ChartConfiguration['options']>(() => {
+    const text = this.theme.isDark() ? '#e2e8f0' : '#1e293b';
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      borderColor: this.theme.isDark() ? '#1e2327' : '#ffffff',
+      plugins: {
+        legend: { position: 'right', labels: { color: text } }
+      }
+    };
   });
 
   ngOnInit(): void {
@@ -71,7 +81,7 @@ export class DashboardComponent implements OnInit {
           labels: chartLabels,
           datasets: [{
             data: chartAmounts,
-            backgroundColor: ['#3f51b5', '#ff4081', '#4caf50', '#ffc107', '#9c27b0']
+            backgroundColor: CHART_COLORS
           }]
         });
       },

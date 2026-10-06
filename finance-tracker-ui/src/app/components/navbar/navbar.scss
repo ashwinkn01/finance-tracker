@@ -1,7 +1,60 @@
+.app-toolbar {
+  // Material 3 toolbars ignore color="primary"; set the tokens directly instead
+  // Dark mode: a muted deep-teal bar. Light mode: the stronger primary teal with white text.
+  --ft-nav-bg: light-dark(var(--mat-sys-primary), var(--mat-sys-primary-container));
+  --ft-nav-fg: light-dark(var(--mat-sys-on-primary), var(--mat-sys-on-primary-container));
+  --mat-toolbar-container-background-color: var(--ft-nav-bg);
+  --mat-toolbar-container-text-color: var(--ft-nav-fg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: 4px;
+  box-shadow: var(--mat-sys-level2);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 18px;
+}
+
 .spacer {
   flex: 1 1 auto;
 }
 
-button {
-  margin-left: 8px; /* Adds a little breathing room between the buttons */
+a[mat-button],
+button[mat-button],
+button[mat-stroked-button] {
+  --mat-button-text-label-text-color: var(--ft-nav-fg);
+  --mat-button-outlined-label-text-color: var(--ft-nav-fg);
+  --mat-button-outlined-outline-color: var(--ft-nav-fg);
+}
+
+button[mat-icon-button] {
+  --mat-icon-button-icon-color: var(--ft-nav-fg);
+}
+
+// Highlight the page you're on
+a.active {
+  background: color-mix(in srgb, var(--ft-nav-fg) 18%, transparent);
+  font-weight: 600;
+}
+
+.user {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px 0 12px;
+  font-size: 14px;
+  opacity: 0.9;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 }

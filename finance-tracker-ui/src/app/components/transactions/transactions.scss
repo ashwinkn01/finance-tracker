@@ -10,19 +10,15 @@
   align-items: center;
   margin-bottom: 24px;
   width: 100%;
+  box-sizing: border-box; /* include the card's padding in the 100%, otherwise the page scrolls sideways */
 }
 
 table {
   width: 100%;
 }
 
-/* Colors for positive and negative cashflow */
-.text-expense {
-  color: var(--mat-sys-error);
-  font-weight: 500;
-}
-
+/* Colors for positive and negative cashflow (royal red / royal green come from styles.scss) */
+.text-expense,
 .text-income {
-  color: #4caf50; 
   font-weight: 500;
 }

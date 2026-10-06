@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { CurrencyService } from '../../services/currency';
+import { ThemeService } from '../../services/theme';
 import { AuthService } from '../../services/auth.service'; // Adjust to auth.ts if your service lacks the .service suffix
 
 @Component({
@@ -26,6 +27,7 @@ export class NavbarComponent {
   // We make this public so the HTML file can read it
   authService = inject(AuthService);
   currency = inject(CurrencyService);
+  theme = inject(ThemeService);
   private router = inject(Router);
 
   logout(): void {

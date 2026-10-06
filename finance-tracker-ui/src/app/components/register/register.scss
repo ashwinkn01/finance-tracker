@@ -1,3 +1,43 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px); /* The window minus the navbar, so the page doesn't scroll */
+  box-sizing: border-box;
+  padding: 16px;
+  background-color: var(--mat-sys-surface); /* Uses Material's built-in theme color */
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px; /* Keeps it looking like a standard login box */
+  padding: 24px;
+}
+
+mat-card-header {
+  margin-bottom: 20px;
+  justify-content: center;
+  text-align: center;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.submit-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 24px 0; /* Makes the button taller and easier to click */
+}
+
+.error-message {
+  color: var(--mat-sys-error); /* Uses Material's standard red error color */
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
 .links {
   margin-top: 24px;
   text-align: center;

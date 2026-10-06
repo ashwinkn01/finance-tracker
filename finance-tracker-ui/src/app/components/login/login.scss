@@ -2,8 +2,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Takes up the full height of the browser window */
-  background-color: var(--mat-sys-surface-variant); /* Uses Material's built-in theme color */
+  min-height: calc(100vh - 64px); /* The window minus the navbar, so the page doesn't scroll */
+  box-sizing: border-box;
+  padding: 16px;
+  background-color: var(--mat-sys-surface); /* Uses Material's built-in theme color */
 }
 
 .login-card {

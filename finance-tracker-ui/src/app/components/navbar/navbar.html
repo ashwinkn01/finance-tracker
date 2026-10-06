@@ -1,8 +1,17 @@
-<mat-toolbar color="primary">
-  <span>Finance Tracker</span>
-  
+<mat-toolbar class="app-toolbar">
+  <a class="brand" routerLink="/">
+    <mat-icon>account_balance_wallet</mat-icon>
+    <span>Finance Tracker</span>
+  </a>
+
   <!-- This empty span acts as a spring, pushing the following buttons to the far right -->
   <span class="spacer"></span>
+
+  <!-- Light / dark toggle (available even when logged out) -->
+  <button mat-icon-button (click)="theme.toggle()"
+          [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+    <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
 
   <!-- The ng-container doesn't render in the DOM, it just holds our *ngIf logic -->
   <ng-container *ngIf="authService.loggedIn()">
@@ -15,8 +24,12 @@
         <button mat-menu-item (click)="currency.set(c.code)">{{ c.code }} – {{ c.name }}</button>
       }
     </mat-menu>
-    <button mat-button routerLink="/transactions">Transactions</button>
-    <button mat-button routerLink="/dashboard">Dashboard</button>
-    <button mat-flat-button color="accent" (click)="logout()">Logout</button>
+
+    <!-- routerLinkActive adds the "active" class to the link for the page you're on -->
+    <a mat-button routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a mat-button routerLink="/transactions" routerLinkActive="active">Transactions</a>
+
+    <span class="user"><mat-icon>person</mat-icon> {{ authService.getCurrentUsername() }}</span>
+    <button mat-stroked-button (click)="logout()">Logout</button>
   </ng-container>
 </mat-toolbar>

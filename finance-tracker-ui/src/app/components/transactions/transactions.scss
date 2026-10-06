@@ -1,0 +1,28 @@
+.table-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+}
+
+/* Colors for positive and negative cashflow */
+.text-expense {
+  color: var(--mat-sys-error);
+  font-weight: 500;
+}
+
+.text-income {
+  color: #4caf50; 
+  font-weight: 500;
+}

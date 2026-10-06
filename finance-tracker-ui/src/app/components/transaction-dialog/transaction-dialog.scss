@@ -1,0 +1,11 @@
+.dialog-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Creates a two-column layout */
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Forces the description field to stretch across both columns */
+.full-width {
+  grid-column: span 2; 
+}

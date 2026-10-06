@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Transaction } from '../models/transaction';
+import { Page, Transaction, TransactionRequest } from '../models/transaction';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +11,17 @@ export class TransactionService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/transactions`;
 
-  getTransactions(): Observable<Transaction[]> {
-    return this.http.get<Transaction[]>(this.apiUrl);
+  // Asks Spring for ONE page (newest first). page is 0-based.
+  getTransactions(page = 0, size = 10): Observable<Page<Transaction>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Page<Transaction>>(this.apiUrl, { params });
   }
 
-  // We will add create(), update(), and delete() methods here later!
-  createTransaction(transaction: Transaction): Observable<Transaction> {
+  createTransaction(transaction: TransactionRequest): Observable<Transaction> {
     return this.http.post<Transaction>(this.apiUrl, transaction);
+  }
+
+  deleteTransaction(id: number): Observable<string> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
   }
 }

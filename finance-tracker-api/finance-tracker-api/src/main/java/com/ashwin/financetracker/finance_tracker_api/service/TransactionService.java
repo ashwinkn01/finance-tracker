@@ -1,6 +1,7 @@
 package com.ashwin.financetracker.finance_tracker_api.service;
 
 import com.ashwin.financetracker.finance_tracker_api.dto.TransactionDto;
+import com.ashwin.financetracker.finance_tracker_api.dto.TransactionResponseDto;
 import com.ashwin.financetracker.finance_tracker_api.entity.Category;
 import com.ashwin.financetracker.finance_tracker_api.entity.Transaction;
 import com.ashwin.financetracker.finance_tracker_api.entity.User;
@@ -32,7 +33,7 @@ public class TransactionService {
     }
 
     // 1. Create a new Transaction
-    public Transaction createTransaction(TransactionDto dto) {
+    public TransactionResponseDto createTransaction(TransactionDto dto) {
         User user = getAuthenticatedUser();
 
         Category category = categoryRepository.findById(dto.getCategoryId())
@@ -52,12 +53,13 @@ public class TransactionService {
         transaction.setCategory(category);
         transaction.setUser(user);
 
-        return transactionRepository.save(transaction);
+        return TransactionResponseDto.from(transactionRepository.save(transaction));
     }
 
     // 2. Get Paginated Transactions
-    public Page<Transaction> getUserTransactions(Pageable pageable) {
-        return transactionRepository.findByUserId(getAuthenticatedUser().getId(), pageable);
+    public Page<TransactionResponseDto> getUserTransactions(Pageable pageable) {
+        return transactionRepository.findByUserId(getAuthenticatedUser().getId(), pageable)
+                .map(TransactionResponseDto::from);
     }
     
     // 3. Delete a Transaction (with security check)

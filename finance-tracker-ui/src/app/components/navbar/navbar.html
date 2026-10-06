@@ -5,7 +5,7 @@
   <span class="spacer"></span>
 
   <!-- The ng-container doesn't render in the DOM, it just holds our *ngIf logic -->
-  <ng-container *ngIf="authService.isLoggedIn()">
+  <ng-container *ngIf="authService.loggedIn()">
     <button mat-button routerLink="/transactions">Transactions</button>
     <button mat-button routerLink="/dashboard">Dashboard</button>
     <button mat-flat-button color="accent" (click)="logout()">Logout</button>

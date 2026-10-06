@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -11,6 +11,10 @@ import { jwtDecode } from 'jwt-decode';
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private tokenKey = 'jwt_token';
+
+  // A signal, so templates (e.g. the navbar) re-render the moment login state changes.
+  // This app runs without zone.js, so plain method calls in templates are not re-checked.
+  readonly loggedIn = signal<boolean>(this.isLoggedIn());
 
   constructor(private http: HttpClient) { }
 
@@ -28,6 +32,7 @@ export class AuthService {
 
   setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
+    this.loggedIn.set(true);
   }
 
   getToken(): string | null {
@@ -36,6 +41,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    this.loggedIn.set(false);
   }
 
   // --- STATE CHECKS ---

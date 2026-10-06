@@ -1,17 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { CanActivateFn } from '@angular/router';
-
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { authGuard } from './auth-guard';
+import { AuthService } from '../services/auth.service';
+import { fakeJwt } from '../testing/fake-jwt';
 
 describe('authGuard', () => {
-  const executeGuard: CanActivateFn = (...guardParameters) =>
-    TestBed.runInInjectionContext(() => authGuard(...guardParameters));
+  const run = () =>
+    TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    localStorage.clear();
+    TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient()] });
   });
 
-  it('should be created', () => {
-    expect(executeGuard).toBeTruthy();
+  it('lets a logged-in user through', () => {
+    TestBed.inject(AuthService).setToken(fakeJwt(3600));
+    expect(run()).toBe(true);
+  });
+
+  it('redirects an anonymous user to /login', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    expect(run()).toBe(false);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
   });
 });

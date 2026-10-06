@@ -1,17 +1,35 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpInterceptorFn } from '@angular/common/http';
-
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { jwtInterceptor } from './jwt-interceptor';
 
 describe('jwtInterceptor', () => {
-  const interceptor: HttpInterceptorFn = (req, next) =>
-    TestBed.runInInjectionContext(() => jwtInterceptor(req, next));
+  let http: HttpClient;
+  let controller: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptors([jwtInterceptor])), provideHttpClientTesting()]
+    });
+    http = TestBed.inject(HttpClient);
+    controller = TestBed.inject(HttpTestingController);
   });
 
-  it('should be created', () => {
-    expect(interceptor).toBeTruthy();
+  afterEach(() => controller.verify());
+
+  it('adds the Bearer header when a token exists', () => {
+    localStorage.setItem('jwt_token', 'abc');
+    http.get('/x').subscribe();
+    const req = controller.expectOne('/x');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer abc');
+    req.flush({});
+  });
+
+  it('sends no Authorization header without a token', () => {
+    http.get('/x').subscribe();
+    const req = controller.expectOne('/x');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
   });
 });
